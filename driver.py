@@ -1,7 +1,7 @@
 import clustering as clu
 import plot as pl
 
-clu.import_and_save() 
+#clu.import_and_save() 
 
 
 

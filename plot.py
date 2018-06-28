@@ -381,7 +381,7 @@ def plot_DeltaT_events_Compare44and75_buses():
     
 def get_path():
     dirname = os.path.dirname(__file__)
-    folder = os.path.join(dirname, 'Plot/')
+    folder = os.path.join(dirname, '../Plot/')
     return folder
 
 def load_clusters(bus):
