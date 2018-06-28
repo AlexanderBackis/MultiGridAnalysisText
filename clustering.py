@@ -9,7 +9,8 @@ import numpy as np
 
 def import_data():
     dirname = os.path.dirname(__file__)
-    folder = os.path.join(dirname, 'Data/')
+    print(dirname)
+    folder = os.path.join(dirname, '../Data/')
     files_in_folder = os.listdir(folder)
     df_tot = pd.DataFrame()
     for file in files_in_folder:
