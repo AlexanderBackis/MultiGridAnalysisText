@@ -97,7 +97,7 @@ def cluster_data(df, bus):
 
 def save_clusters(df_clu, bus):
     dirname = os.path.dirname(__file__)
-    folder = os.path.join(dirname, 'Clusters/')
+    folder = os.path.join(dirname, '../Clusters/')
     file_path = folder + 'Bus_' + str(bus) + '.csv'
     df_clu.to_csv(file_path, sep=',', encoding='utf-8', index=False)
     
@@ -125,7 +125,7 @@ def import_and_save():
 
 def get_path():
     dirname = os.path.dirname(__file__)
-    folder = os.path.join(dirname, 'Plot/')
+    folder = os.path.join(dirname, '../Plot/')
     return folder
                                        
 def create_dict(size):

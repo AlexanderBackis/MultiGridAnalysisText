@@ -308,7 +308,7 @@ def plot_DeltaT_events_buses():
 def plot_DeltaT_events_Compare44and75(bus, fig):
     print('Bus: ' + str(bus))
     dirname = os.path.dirname(__file__)
-    folder = os.path.join(dirname, 'Clusters44kHz/')
+    folder = os.path.join(dirname, '../Clusters44kHz/')
     file_path = folder + 'Bus_' + str(bus) + '.csv'
     df_clu = load_clusters_from_file_path(bus, file_path)
     size = df_clu.shape[0]
@@ -332,7 +332,7 @@ def plot_DeltaT_events_Compare44and75(bus, fig):
     
     
     
-    folder = os.path.join(dirname, 'Clusters75kHz/')
+    folder = os.path.join(dirname, '../Clusters75kHz/')
     file_path = folder + 'Bus_' + str(bus) + '.csv'
     df_clu = load_clusters_from_file_path(bus, file_path)
     size = df_clu.shape[0]
@@ -386,7 +386,7 @@ def get_path():
 
 def load_clusters(bus):
     dirname = os.path.dirname(__file__)
-    folder = os.path.join(dirname, 'Clusters/')
+    folder = os.path.join(dirname, '../Clusters/')
     file_path = folder + 'Bus_' + str(bus) + '.csv'
     df_clu = pd.read_csv(file_path, header=None, sep=',', 
                      names=['Time', 'ToF', 'wCh', 'gCh', 'wADC', 
