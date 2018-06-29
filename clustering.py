@@ -7,7 +7,19 @@ import numpy as np
 # Main Functions
 # =============================================================================
 
+
+
 def import_data():
+    """ Imports raw data from sister folder 'Data/', stores it in a pandas 
+        DataFrame and then returns it. If several files are present in the 
+        'Data/'-folder, these are concatenated into one large DataFrame.
+         
+    Returns:
+        df_tot (pd.DataFrame): DataFrame were each row is a datapoint, and each 
+                               column is a different measured property 
+                               (Trigger, HighTime, Time, Bus, Channel and ADC).
+            
+    """
     dirname = os.path.dirname(__file__)
     print(dirname)
     folder = os.path.join(dirname, '../Data/')
@@ -34,6 +46,23 @@ def import_data():
     return df_tot
 
 def cluster_data(df, bus):
+    """ Clusters the data contained in the imported pd.DataFrame. Data points
+        with the same timestamp are grouped together, the wire channel and
+        grid channel with most collected charge are then used as 2D hit 
+        position.
+        
+    Args:
+        df (pd.DataFrame): DataFrame containing the imported data
+        bus (int): The current bus analyzed (each bus acts as an independent
+                   detector)
+         
+    Returns:
+        df_clu (pd.DataFrame): DataFrame were each row is a candidate neutron
+                               event, and each column is a different property 
+                               of the candidate event (Time, ToF, wCh, gCh,
+                               wADC, gADC, wM, gM)
+            
+    """
     rowNbr = 1
     df = df[(df.Bus == bus) | (df.Bus == -1)]
     size = df.shape[0]
@@ -91,11 +120,22 @@ def cluster_data(df, bus):
     
     df_clu = pd.DataFrame(dict_clu)
     df_clu = df_clu.drop(range(event_index, size, 1))
-    print('Clusters')
-    print(df_clu)
     return df_clu
 
 def save_clusters(df_clu, bus):
+    """ Saves clustered data into a '.csv'-file in sister folder 'Clusters/'.
+    
+    Args:
+        df_clu (pd.DataFrame): DataFrame containing the clustered data
+        bus (int): The current bus analyzed (each bus acts as an independent
+                   detector)
+         
+    Returns:
+        df_tot (pd.DataFrame): DataFrame were each row is a datapoint, and each 
+                               column is a different measured property 
+                               (Trigger, HighTime, Time, Bus, Channel and ADC).
+            
+    """
     dirname = os.path.dirname(__file__)
     folder = os.path.join(dirname, '../Clusters/')
     file_path = folder + 'Bus_' + str(bus) + '.csv'
@@ -103,6 +143,12 @@ def save_clusters(df_clu, bus):
     
 
 def import_and_save():
+    """ Imports data, clusters it, and saves the clusters to file.
+         
+    Yields:
+        Saves the clusters to file
+            
+    """
     df = import_data()
     bus_vec = np.array(range(0,3))
     for bus in bus_vec:

@@ -48,8 +48,7 @@ def plot_PHS_buses(df):
 
 def plot_2D_hit(bus, fig):
     df_clu = load_clusters(bus)
-    df_clu_red = df_clu[(df_clu.wCh != -1) & (df_clu.gCh != -1) & 
-                        (df_clu.wM == 1) & (df_clu['gADC']/df_clu['wADC'] > 4)]
+    df_clu_red = df_clu[(df_clu.wCh != -1) & (df_clu.gCh != -1)]
     plt.subplot(1,3,bus+1)
     plt.hist2d(df_clu_red.wCh, df_clu_red.gCh, bins=[80, 40], 
                range=[[0,80],[80,120]], norm=LogNorm(), vmin=1, vmax=10000)
@@ -82,8 +81,7 @@ def plot_2D_hit_buses():
 
 def plot_charge_frac(bus, fig):
     df_clu = load_clusters(bus)
-    df_clu_red = df_clu[(df_clu.wCh != -1) & (df_clu.gCh != -1) & 
-                        (df_clu.wM == 1) & (df_clu.wCh != 63)]
+    df_clu_red = df_clu[(df_clu.wCh != -1) & (df_clu.gCh != -1)]
     plt.subplot(1,3,bus+1)
     print(df_clu_red[df_clu_red['gADC'] > df_clu_red['wADC']])
     plt.hist(np.divide(df_clu_red.gADC, df_clu_red.wADC), bins=150, log=True, 
@@ -232,7 +230,6 @@ def plot_multiplicity_buses():
     
 def plot_2D_multiplicity(bus, fig):
     df_clu = load_clusters(bus)
-    df_clu = df_clu[(df_clu.wM == 1) & (df_clu.gM > 0)]
     plt.subplot(1,3,bus+1)
     hist, xbins, ybins, im = plt.hist2d(df_clu.wM, df_clu.gM, bins=[8, 8], 
                                         range=[[0,8],[0,8]],
