@@ -1,7 +1,7 @@
 import clustering as clu
 import plot as pl
 
-#clu.import_and_save() 
+clu.import_and_save() 
 
 
 
@@ -12,7 +12,7 @@ import plot as pl
 #df = clu.import_data()
 #pl.plot_PHS_buses(df)
 
-pl.plot_2D_hit_buses()
+#pl.plot_2D_hit_buses()
 #pl.plot_2D_multiplicity_buses()
 #pl.plot_charge_frac_buses()
 #pl.plot_charge_buses()
