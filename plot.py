@@ -17,7 +17,7 @@ def plot_PHS(df, bus, fig):
     print(df_red.Channel)
     print(df_red.ADC)
     plt.hist2d(df_red.Channel, df_red.ADC, bins=[10, 120], norm=LogNorm(), 
-               range=[[75, 85], [0, 4400]])
+               range=[[100, 110], [0, 4400]], vmin=1, vmax=10000)
     plt.ylabel("Charge [ADC channels]")
     plt.xlabel("Channel [a.u.]")
     plt.colorbar()
@@ -27,7 +27,8 @@ def plot_PHS(df, bus, fig):
 def plot_PHS_buses(df):
     bus_vec = np.array(range(0,3))
     fig = plt.figure()
-    fig.suptitle('2D-Histogram of Channel vs Charge',x=0.5, y=1)
+    fig.suptitle('2D-Histogram of Channel vs Charge',x=0.5,
+                 y=1)
     fig.set_figheight(4)
     fig.set_figwidth(14)
     for bus in bus_vec:
@@ -47,10 +48,11 @@ def plot_PHS_buses(df):
 
 def plot_2D_hit(bus, fig):
     df_clu = load_clusters(bus)
-    df_clu_red = df_clu[(df_clu.wCh != -1) & (df_clu.gCh != -1)]
+    df_clu_red = df_clu[(df_clu.wCh != -1) & (df_clu.gCh != -1) & 
+                        (df_clu.wM == 1) & (df_clu['gADC']/df_clu['wADC'] > 4)]
     plt.subplot(1,3,bus+1)
-    plt.hist2d(df_clu_red.wCh, df_clu_red.gCh, bins=[80, 40], norm=LogNorm(), 
-               vmin=1, vmax=10000)
+    plt.hist2d(df_clu_red.wCh, df_clu_red.gCh, bins=[80, 40], 
+               range=[[0,80],[80,120]], norm=LogNorm(), vmin=1, vmax=10000)
     plt.xlabel("Wire [Channel number]")
     plt.ylabel("Grid [Channel number]")
     plt.colorbar()
@@ -80,7 +82,8 @@ def plot_2D_hit_buses():
 
 def plot_charge_frac(bus, fig):
     df_clu = load_clusters(bus)
-    df_clu_red = df_clu[(df_clu.wCh != -1) & (df_clu.gCh != -1)]
+    df_clu_red = df_clu[(df_clu.wCh != -1) & (df_clu.gCh != -1) & 
+                        (df_clu.wM == 1) & (df_clu.wCh != 63)]
     plt.subplot(1,3,bus+1)
     print(df_clu_red[df_clu_red['gADC'] > df_clu_red['wADC']])
     plt.hist(np.divide(df_clu_red.gADC, df_clu_red.wADC), bins=150, log=True, 
@@ -161,7 +164,8 @@ def plot_trigger_difference(df):
     df_red_1.reset_index(drop=True, inplace=True)
     df_red_2.reset_index(drop=True, inplace=True)
 
-    plt.plot(range(0,df_red_1.shape[0]),df_red_2['Time'] - df_red_1['Time'], '.-')
+    plt.plot(range(0,df_red_1.shape[0]),df_red_2['Time'] - df_red_1['Time'], 
+             '.-')
     plt.xlabel('External trigger')
     plt.xlim([0,500])
     plt.ylabel('$\Delta$T [TDC channels]')
@@ -228,15 +232,19 @@ def plot_multiplicity_buses():
     
 def plot_2D_multiplicity(bus, fig):
     df_clu = load_clusters(bus)
+    df_clu = df_clu[(df_clu.wM == 1) & (df_clu.gM > 0)]
     plt.subplot(1,3,bus+1)
-    hist, xbins, ybins, im = plt.hist2d(df_clu.wM, df_clu.gM, bins=[8, 8], range=[[0,8],[0,8]],
+    hist, xbins, ybins, im = plt.hist2d(df_clu.wM, df_clu.gM, bins=[8, 8], 
+                                        range=[[0,8],[0,8]],
                                        norm=LogNorm(), vmin=1, vmax=1000000)
     tot = df_clu.shape[0]
     for i in range(len(ybins)-1):
         for j in range(len(xbins)-1):
             if hist[j,i] > 0:
-                plt.text(xbins[j]+0.5,ybins[i]+0.5, str(format(100*(round((hist[j,i]/tot),3)),'.1f')) + "%", 
-                         color="r", ha="center", va="center", fontweight="bold", fontsize=8.5)
+                plt.text(xbins[j]+0.5,ybins[i]+0.5, 
+                         str(format(100*(round((hist[j,i]/tot),3)),'.1f')) + 
+                         "%", color="r", ha="center", va="center", 
+                         fontweight="bold", fontsize=8.5)
     
     plt.xticks([0.5,1.5,2.5,3.5,4.5,5.5,6.5,7.5],['0','1','2','3','4','5','6',
                '7'])
@@ -252,7 +260,8 @@ def plot_2D_multiplicity(bus, fig):
 def plot_2D_multiplicity_buses():
     bus_vec = np.array(range(0,3))
     fig = plt.figure()
-    fig.suptitle('2D Histogram of multiplicity within a time cluster', x=0.5, y=1)
+    fig.suptitle('2D Histogram of multiplicity within a time cluster', x=0.5, 
+                 y=1)
     fig.set_figheight(4)
     fig.set_figwidth(14)
     for bus in bus_vec:
@@ -327,7 +336,8 @@ def plot_DeltaT_events_Compare44and75(bus, fig):
     print('44kHz')
     print('Maximum at ' + str(x[max_idx]))    
     print('Mean at ' + str(np.sum(x[:-1]*y)/np.sum(y)))
-    text = '44kHz \n' + 'Max at: ' + str(x[max_idx]) + ' TDC ch.' + '\n' + 'Mean: ' + str(round(np.sum(x[:-1]*y)/np.sum(y)))  + ' TDC ch.'
+    text = ('44kHz \n' + 'Max at: ' + str(x[max_idx]) + ' TDC ch.' + '\n' + 
+            'Mean: ' + str(round(np.sum(x[:-1]*y)/np.sum(y)))  + ' TDC ch.')
     plt.text(0.55, 0.7, text, ha='left', va='center', transform=ax.transAxes)
     
     
@@ -347,7 +357,8 @@ def plot_DeltaT_events_Compare44and75(bus, fig):
     print('75kHz')
     print('Maximum at ' + str(x[max_idx]))    
     print('Mean at ' + str(np.sum(x[:-1]*y)/np.sum(y)))
-    text = '75kHz \n' + 'Max at: ' + str(x[max_idx]) + ' TDC ch.' + '\n' + 'Mean: ' + str(round(np.sum(x[:-1]*y)/np.sum(y)))  + ' TDC ch.'
+    text = ('75kHz \n' + 'Max at: ' + str(x[max_idx]) + ' TDC ch.' + '\n' + 
+            'Mean: ' + str(round(np.sum(x[:-1]*y)/np.sum(y)))  + ' TDC ch.')
     plt.text(0.55, 0.5, text, ha='left', va='center', transform=ax.transAxes)
     
 
@@ -433,6 +444,7 @@ def calculate_frequency(x,y):
     print('Minus: ' + str(freq- freqLower))
 
 
+  
     
     
     

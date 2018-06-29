@@ -114,15 +114,6 @@ def import_and_save():
 # Helper Functions
 # =============================================================================
 
-#def convert_to_int(df):
-#    df['Trigger'] = df['Trigger'].astype(int)
-#    df['HighTime'] = df['HighTime'].astype(int)
-#    df['Time'] = df['Time'].astype(int)
-#    df['Bus'] = df['Bus'].astype(int)
-#    df['Channel'] = df['Channel'].astype(int)
-#    df['ADC'] = df['ADC'].astype(int)
-#    return df
-
 def get_path():
     dirname = os.path.dirname(__file__)
     folder = os.path.join(dirname, '../Plot/')
