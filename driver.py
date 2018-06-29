@@ -1,14 +1,14 @@
 import clustering as clu
 import plot as pl
 
-clu.import_and_save() 
+#clu.import_and_save() 
 
 
 
 #hfhfshfd
 
-
-
+name_vec = ['20180628-124623_1', '20180628-125019_1', '20180628-130039_1']
+pl.plot_DeltaT_and_compare(name_vec)
 #df = clu.import_data()
 #pl.plot_PHS_buses(df)
 

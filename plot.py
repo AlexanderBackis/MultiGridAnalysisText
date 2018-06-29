@@ -372,11 +372,61 @@ def plot_DeltaT_events_Compare44and75_buses():
     fig.savefig(plot_path)
     
     
+# =============================================================================
+# Plot time difference between events from several different data sets
+# =============================================================================
+
+def plot_DeltaT_and_compare_bus(df_clu, bus, fig, name):
+    plt.subplot(1,3,bus+1)
+    size = df_clu.shape[0]
+    df_red_1 = df_clu.drop(df_clu.index[size-1])
+    df_red_2 = df_clu.drop(df_clu.index[0])
+    df_red_1.reset_index(drop=True, inplace=True)
+    df_red_2.reset_index(drop=True, inplace=True)
+    plt.hist((df_red_2['Time'] - df_red_1['Time']), bins=200, range=[0, 4000], 
+             alpha = 0.6, label = name)
+    plt.legend(loc='upper right')
+    plt.xlabel("$\Delta$T [TDC channels]")
+    plt.ylabel("Counts")
+    plt.ylim([1,22000])
+    name = 'Bus ' + str(bus)
+    plt.title(name)
+    
+def plot_DeltaT_and_compare(name_vec):
+    bus_vec = np.array(range(0,3))
+    fig = plt.figure()
+    fig.suptitle('Histogram of time $\Delta$T between events', x=0.5, y=1.0)
+    fig.set_figheight(4)
+    fig.set_figwidth(14)
+    for name in name_vec:
+        folder = get_clusters_folder_path(name)
+        for bus in bus_vec:
+            file_path = folder + 'Bus_' + str(bus) + '.csv'
+            df_clu = load_clusters_from_file_path(bus, file_path)
+            plot_DeltaT_and_compare_bus(df_clu, bus, fig, name)
+    name = 'Histogram of time difference between events, ILL data 2018_06_28'
+    plt.tight_layout()
+    plt.show()
+    plot_path = get_path() + name  + '.pdf'
+    fig.savefig(plot_path)       
+        
+    
+    
+    
+
+    
+    
+    
     
     
 # =============================================================================
 # Helper Functions
 # =============================================================================    
+
+def get_clusters_folder_path(name):
+    dirname = os.path.dirname(__file__)
+    folder = os.path.join(dirname, '../Clusters/' + name + '/')
+    return folder
     
     
 def get_path():
