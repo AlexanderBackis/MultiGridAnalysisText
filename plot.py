@@ -350,6 +350,7 @@ def plot_DeltaT_events_Compare44and75(bus, fig):
     text = '75kHz \n' + 'Max at: ' + str(x[max_idx]) + ' TDC ch.' + '\n' + 'Mean: ' + str(round(np.sum(x[:-1]*y)/np.sum(y)))  + ' TDC ch.'
     plt.text(0.55, 0.5, text, ha='left', va='center', transform=ax.transAxes)
     
+
     plt.legend(loc='upper right')
     plt.xlabel("$\Delta$T [TDC channels]")
     plt.ylabel("Counts")
@@ -383,12 +384,18 @@ def plot_DeltaT_and_compare_bus(df_clu, bus, fig, name):
     df_red_2 = df_clu.drop(df_clu.index[0])
     df_red_1.reset_index(drop=True, inplace=True)
     df_red_2.reset_index(drop=True, inplace=True)
-    plt.hist((df_red_2['Time'] - df_red_1['Time']), bins=200, range=[0, 4000], 
-             alpha = 0.6, label = name)
+    y, x, _ = plt.hist((df_red_2['Time'] - df_red_1['Time']), 
+                       bins=300, range=[0, 6000], alpha = 0.6, label = name)
+    calculate_frequency(x,y)
     plt.legend(loc='upper right')
-    plt.xlabel("$\Delta$T [TDC channels]")
+    plt.xlabel("$\Delta$T [$\mu$s]")
     plt.ylabel("Counts")
-    plt.ylim([1,22000])
+    plt.ylim([1,35000])
+    #plt.xlim([0,5000])
+    loc = np.arange(0, 7000, step=1000)
+    plt.xticks(loc, loc*0.0625) 
+
+    
     name = 'Bus ' + str(bus)
     plt.title(name)
     
@@ -400,7 +407,9 @@ def plot_DeltaT_and_compare(name_vec):
     fig.set_figwidth(14)
     for name in name_vec:
         folder = get_clusters_folder_path(name)
+        print(name)
         for bus in bus_vec:
+            print(bus)
             file_path = folder + 'Bus_' + str(bus) + '.csv'
             df_clu = load_clusters_from_file_path(bus, file_path)
             plot_DeltaT_and_compare_bus(df_clu, bus, fig, name)
@@ -410,9 +419,19 @@ def plot_DeltaT_and_compare(name_vec):
     plot_path = get_path() + name  + '.pdf'
     fig.savefig(plot_path)       
         
-    
-    
-    
+
+def calculate_frequency(x,y):
+    mean = np.sum(x[:-1]*y)/np.sum(y)
+    print(mean * 0.0625)
+    freq = 1 / (mean * 62.5 * 10 ** (-9))
+    sd = np.sqrt((np.sum(y*np.power((x[:-1]-mean),2)))/(np.sum(y)))
+    print('SD: ' + str(sd*0.0625))
+    print('Frequency: ' + str(freq) + 'Hz')
+    freqUpper = 1 / ((mean-sd) * 62.5 * 10 ** (-9))
+    freqLower = 1 / ((mean+sd) * 62.5 * 10 ** (-9))
+    print('Plus: ' + str(freqUpper - freq))
+    print('Minus: ' + str(freq- freqLower))
+
 
     
     
