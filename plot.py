@@ -3,9 +3,6 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
-import fitting as ft
-
-
 
 
 # =============================================================================
@@ -40,9 +37,6 @@ def plot_PHS_buses(df):
     plot_path = get_path() + name  + '.pdf'
     fig.savefig(plot_path)
 
-
-
-
 # =============================================================================
 # Plot 2D Histogram of Hit Position
 # =============================================================================
@@ -67,6 +61,108 @@ def plot_2D_hit_buses():
     fig.set_figwidth(14)
     for bus in bus_vec:
         plot_2D_hit(bus, fig)
+    name = '2D-Histogram of hit position, individual buses'
+    plt.tight_layout()
+    plt.show()
+    plot_path = get_path() + name  + '.pdf'
+    fig.savefig(plot_path)
+    
+
+# =============================================================================
+# Plot 2D Histogram of Hit Position with a specific side
+# =============================================================================
+    
+def plot_2D_side_1(bus_vec, fig):
+    name = 'Front view'
+    df_tot = pd.DataFrame()
+    
+    for i, bus in enumerate(bus_vec):
+        print(i)
+        df_clu = load_clusters(bus)
+        df_clu = df_clu[(df_clu.wCh != -1) & (df_clu.gCh != -1)]
+        df_clu['wCh'] += (80 * i)
+        df_tot = pd.concat([df_tot, df_clu])        
+    
+    plt.hist2d(df_tot.wCh, df_tot.gCh, bins=[12, 40], 
+               range=[[0,240],[80,120]], norm=LogNorm())
+    
+    loc = np.arange(20, 260, step=20)
+    ticks = np.arange(1, 13)
+    plt.xticks(loc - 10, ticks)
+    plt.xlabel("x")
+    plt.ylabel("y")
+    plt.colorbar()
+    plt.title(name)
+    
+def plot_2D_side_2(bus_vec, fig):
+    name = 'Top view'
+    df_tot = pd.DataFrame()
+    
+    for i, bus in enumerate(bus_vec):
+        print(bus)
+        df_clu = load_clusters(bus)
+        df_clu = df_clu[(df_clu.wCh != -1) & (df_clu.gCh != -1)]
+        df_clu['wCh'] += (80 * i)
+        df_tot = pd.concat([df_tot, df_clu])  
+        
+    plt.hist2d(np.floor(df_tot['wCh'] / 20).astype(int), df_tot['wCh'] % 20, 
+               bins=[12, 20], range=[[0,11],[0,19]], norm=LogNorm())
+
+    plt.xlabel("x")
+    plt.ylabel("z")
+    plt.colorbar()
+    plt.title(name)
+    
+def plot_2D_side_3(bus_vec, fig):
+    name = 'Side view'
+    df_tot = pd.DataFrame()
+    
+    for i, bus in enumerate(bus_vec):
+        print(bus)
+        df_clu = load_clusters(bus)
+        df_clu = df_clu[(df_clu.wCh != -1) & (df_clu.gCh != -1)]
+        df_tot = pd.concat([df_tot, df_clu])
+    
+    print(df_tot['gCh'])
+    print(df_tot['wCh'] % 20)
+        
+    plt.hist2d(df_tot['gCh'], df_tot['wCh'] % 20,
+               bins=[40, 20], range=[[80,119],[0,19]], norm=LogNorm())
+
+    plt.xlabel("y")
+    plt.ylabel("z")
+    plt.colorbar()
+    plt.title(name)
+    
+def plot_all_sides(bus_vec):
+    fig = plt.figure()
+    
+    fig.set_figheight(4)
+    fig.set_figwidth(14)
+    
+    plt.subplot(1,3,1)
+    plot_2D_side_1(bus_vec, fig)
+    plt.subplot(1,3,2)
+    plot_2D_side_2(bus_vec, fig)
+    plt.subplot(1,3,3)
+    plot_2D_side_3(bus_vec, fig)
+    
+    name = '2D Histogram of hit position'
+    fig.suptitle(name, x=0.5, y=1)
+    plt.tight_layout()
+    plt.show()
+    plot_path = get_path() + name  + '.pdf'
+    fig.savefig(plot_path)
+    
+    
+    
+
+
+    
+def plot_2D_specific_side(side, bus_vec):
+    fig = plt.figure()
+    fig.suptitle('2D-Histogram of hit position',x=0.5, y=1)
+
     name = '2D-Histogram of hit position, individual buses'
     plt.tight_layout()
     plt.show()
@@ -388,18 +484,14 @@ def plot_DeltaT_events_Compare44and75_buses():
 
 def plot_DeltaT_and_compare_bus(df_clu, bus, fig, name):
     plt.subplot(1,3,bus+1)
-    size = df_clu.shape[0]
-    df_red_1 = df_clu.drop(df_clu.index[size-1])
-    df_red_2 = df_clu.drop(df_clu.index[0])
-    df_red_1.reset_index(drop=True, inplace=True)
-    df_red_2.reset_index(drop=True, inplace=True)
-    y, x, _ = plt.hist((df_red_2['Time'] - df_red_1['Time']), 
-                       bins=300, range=[0, 6000], alpha = 0.6, label = name)
+    y, x, _ = plt.hist(df_clu['Time'].diff(), 
+                       bins=300, log=True, range=[0, 6000], alpha = 0.6, 
+                       label = name)
     calculate_frequency(x,y)
     plt.legend(loc='upper right')
     plt.xlabel("$\Delta$T [$\mu$s]")
     plt.ylabel("Counts")
-    plt.ylim([1,35000])
+    plt.ylim([10,100000])
     #plt.xlim([0,5000])
     loc = np.arange(0, 7000, step=1000)
     plt.xticks(loc, loc*0.0625) 
@@ -442,10 +534,65 @@ def calculate_frequency(x,y):
     print('Minus: ' + str(freq- freqLower))
 
 
-  
+ 
+
+# =============================================================================
+# Set a small window of time, count how many neutrons, and convert to freq.
+# ============================================================================= 
+
+def plot_freq_and_compare_bus(df_clu, bus, fig, name):
+    plt.subplot(1,3,bus+1)
+    NbrEvents = np.empty([20000],dtype=int)
+    itr = df_clu.iterrows()
+    row = next(itr)[1]
+    end = row.Time + 160 #Time window is set to 10 us
+    count = 1
+    for i, row in enumerate(itr):
+        row = row[1]
+        Time = row.Time
+        if Time < end:
+            count = count + 1
+        else:
+            NbrEvents[count] = NbrEvents[count] + 1
+            end = Time + 160
+            count = 1
     
+    plt.plot(range(0,20000), NbrEvents)
+    plt.legend(loc='upper right')
+    plt.xlabel("Events per 10 us")
+    plt.ylabel("Counts")
+    plt.ylim([100,100000])
+    #plt.xlim([0,5000])
+    loc = np.arange(0, 7000, step=1000)
+    plt.xticks(loc, loc*0.0625) 
+
     
+    name = 'Bus ' + str(bus)
+    plt.title(name)
     
+def plot_freq_and_compare(name_vec, bus_vec):
+    fig = plt.figure()
+    fig.suptitle('Histogram of instaneous frequency', x=0.5, y=1.0)
+    fig.set_figheight(4)
+    fig.set_figwidth(14)
+    for name in name_vec:
+        folder = get_clusters_folder_path(name)
+        print(name)
+        for bus in bus_vec:
+            print(bus)
+            file_path = folder + 'Bus_' + str(bus) + '.csv'
+            df_clu = load_clusters_from_file_path(bus, file_path)
+            plot_freq_and_compare_bus(df_clu, bus, fig, name)
+    name = 'Histogram of instaneous frequency, ILL data 2018_06_28'
+    plt.tight_layout()
+    plt.show()
+    plot_path = get_path() + name  + '.pdf'
+    fig.savefig(plot_path)  
+
+
+
+
+
     
     
 # =============================================================================
@@ -456,7 +603,6 @@ def get_clusters_folder_path(name):
     dirname = os.path.dirname(__file__)
     folder = os.path.join(dirname, '../Clusters/' + name + '/')
     return folder
-    
     
 def get_path():
     dirname = os.path.dirname(__file__)
