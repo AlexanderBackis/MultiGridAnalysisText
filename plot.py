@@ -16,10 +16,8 @@ import matplotlib.cm as cmx
 def plot_PHS(df, bus, fig):
     df_red = df[df.Bus == bus]
     plt.subplot(1,3,bus+1)
-    print(df_red.Channel)
-    print(df_red.ADC)
-    plt.hist2d(df_red.Channel, df_red.ADC, bins=[10, 120], norm=LogNorm(), 
-               range=[[100, 110], [0, 4400]], vmin=1, vmax=10000)
+    plt.hist2d(df_red.Channel, df_red.ADC, bins=[120, 120], norm=LogNorm(), 
+               range=[[0, 120], [0, 4400]], vmin=1, vmax=10000)
     plt.ylabel("Charge [ADC channels]")
     plt.xlabel("Channel [a.u.]")
     plt.colorbar()
@@ -81,7 +79,7 @@ def plot_2D_side_1(bus_vec, fig):
     df_tot = pd.DataFrame()
     
     for i, bus in enumerate(bus_vec):
-        print(i)
+        print(bus)
         df_clu = load_clusters(bus)
         df_clu = df_clu[(df_clu.wCh != -1) & (df_clu.gCh != -1)]
         df_clu['wCh'] += (80 * i)
@@ -135,8 +133,6 @@ def plot_2D_side_3(bus_vec, fig):
         df_clu = df_clu[(df_clu.wCh != -1) & (df_clu.gCh != -1)]
         df_tot = pd.concat([df_tot, df_clu])
     
-    print(df_tot['gCh'])
-    print(df_tot['wCh'] % 20)
         
     plt.hist2d(df_tot['wCh'] % 20, df_tot['gCh'],
                bins=[20, 40], range=[[0,20],[80,120]], norm=LogNorm(), 
@@ -164,7 +160,7 @@ def plot_all_sides(bus_vec):
     plt.subplot(1,3,3)
     plot_2D_side_3(bus_vec, fig)
     
-    name = '2D Histogram of hit position, different sides'
+    name = ('2D Histogram of hit position, different sides')
     fig.suptitle(name, x=0.5, y=1)
     plt.tight_layout()
     plt.show()
@@ -172,7 +168,7 @@ def plot_all_sides(bus_vec):
     fig.savefig(plot_path)
     
 
-def plot_all_sides_3D(bus_vec, thres):
+def plot_all_sides_3D(bus_vec, countThres):
     df_tot = pd.DataFrame()
     
     for i, bus in enumerate(bus_vec):
@@ -199,23 +195,23 @@ def plot_all_sides_3D(bus_vec, thres):
     for i in range(0,12):
         for j in range(80,120):
             for k in range(0,20):
-                if H[i,j-80,k] > thres:
+                if H[i,j-80,k] > countThres:
                     hist[0][loc] = i
                     hist[1][loc] = j
                     hist[2][loc] = k
                     hist[3][loc] = H[i,j-80,k]
                     loc = loc + 1
                         
-    scatter3d(hist[0], hist[2], hist[1], hist[3], thres)
+    scatter3d(hist[0], hist[2], hist[1], hist[3], countThres)
 
     
-
-def scatter3d(x,y,z, cs, thres, colorsMap='viridis'):
+def scatter3d(x,y,z, cs, countThres, colorsMap='viridis'):
     cm = plt.get_cmap(colorsMap)
    # cNorm = Normalize(vmin=min(cs), vmax=max(cs))
     scalarMap = cmx.ScalarMappable(norm=LogNorm(), cmap=cm)
     fig = plt.figure()
-    name = 'Scatter map of hit location (threshold ' + str(thres) + ' counts)'
+    name = ('Scatter map of hit location (threshold: ' 
+            + str(countThres) + ' counts)')
     fig.suptitle(name ,x=0.45, y=1)
     ax = Axes3D(fig)
     ax.scatter(x, y, z, c=scalarMap.to_rgba(cs), marker= "o", alpha = 0.6)
@@ -238,60 +234,15 @@ def scatter3d(x,y,z, cs, thres, colorsMap='viridis'):
     
     
     scalarMap.set_array(cs)
-    scalarMap.set_clim(vmin=1, vmax=5000)
+   # scalarMap.set_clim(vmin=1, vmax=5000)
     fig.colorbar(scalarMap)
     
-    fig.tight_layout()
     plt.show()
     
     plot_path = get_path() + name  + '.pdf'
     fig.savefig(plot_path, bbox_inches='tight')
-    
 
-
-def plot_3d_surfaces():
-    # domains
-    x = np.logspace(-1.,np.log10(5),50) # [0.1, 5]
-    y = np.linspace(6,9,50)             # [6, 9]
-    z = np.linspace(-1,1,50)            # [-1, 1]
-
-    # convert to 2d matrices
-    Z = np.outer(z.T, z)        # 50x50
-    X, Y = np.meshgrid(x, y)    # 50x50
-
-    # fourth dimention - colormap
-    # create colormap according to x-value (can use any 50x50 array)
-    color_dimension = X # change to desired fourth dimension
-    minn, maxx = color_dimension.min(), color_dimension.max()
-    norm = Normalize(minn, maxx)
-    m = plt.cm.ScalarMappable(norm=norm, cmap='jet')
-    m.set_array([])
-    fcolors = m.to_rgba(color_dimension)
-
-    # plot
-    fig = plt.figure()
-    ax = fig.gca(projection='3d')
-    ax.plot_surface(X,Y,Z, rstride=1, cstride=1, facecolors=fcolors, vmin=minn, vmax=maxx, shade=False)
-    ax.set_xlabel('x')
-    ax.set_ylabel('y')
-    ax.set_zlabel('z')
-    fig.show()
-    
-
-
-    
-def plot_2D_specific_side(side, bus_vec):
-    fig = plt.figure()
-    fig.suptitle('2D-Histogram of hit position',x=0.5, y=1)
-
-    name = '2D-Histogram of hit position, individual buses'
-    plt.tight_layout()
-    plt.show()
-    plot_path = get_path() + name  + '.pdf'
-    fig.savefig(plot_path)
-    
-    
-    
+        
     
 # =============================================================================
 # Plot Histogram of Charge fraction
@@ -301,7 +252,6 @@ def plot_charge_frac(bus, fig):
     df_clu = load_clusters(bus)
     df_clu_red = df_clu[(df_clu.wCh != -1) & (df_clu.gCh != -1)]
     plt.subplot(1,3,bus+1)
-    print(df_clu_red[df_clu_red['gADC'] > df_clu_red['wADC']])
     plt.hist(np.divide(df_clu_red.gADC, df_clu_red.wADC), bins=150, log=True, 
              range=[0,6])
     plt.xlabel("gADC / wADC")
@@ -370,11 +320,7 @@ def plot_charge_buses():
 def plot_trigger_difference(df):
     fig = plt.figure()
     df_red = df[(df.Bus == -1)]
-    print(df_red)
-    print(df_red.index[0])
     size = df_red.shape[0]
-    print(size)
-    print(df_red.index[size-1])
     df_red_1 = df_red.drop(df_red.index[size-1])
     df_red_2 = df_red.drop(df_red.index[0])
     df_red_1.reset_index(drop=True, inplace=True)
@@ -499,8 +445,6 @@ def plot_DeltaT_events(bus, fig):
     df_red_2 = df_clu.drop(df_clu.index[0])
     df_red_1.reset_index(drop=True, inplace=True)
     df_red_2.reset_index(drop=True, inplace=True)
-    print(df_red_1)
-    print(df_red_2)
     plt.subplot(1,3,bus+1)
     plt.hist((df_red_2['Time'] - df_red_1['Time']), bins=200, 
              range=[0, 4000])
@@ -711,7 +655,36 @@ def plot_freq_and_compare(name_vec, bus_vec):
     fig.savefig(plot_path)  
 
 
+# =============================================================================
+# Plot 2D Histogram of wADC and gADC
+# =============================================================================
 
+def plot_wADC_vs_gADC(bus, fig):
+    df_clu = load_clusters(bus)
+    df_clu_red = df_clu[(df_clu.wCh != -1) & (df_clu.gCh != -1)]
+    plt.subplot(1,3,bus+1)
+    plt.hist2d(df_clu_red.wADC, df_clu_red.gADC, bins=[200, 200], 
+               norm=LogNorm(),range=[[0, 5000], [0, 5000]], vmin=1, vmax=10000)
+    plt.xlabel("wADC [ADC channels]")
+    plt.ylabel("gADC [ADC channels]")
+    plt.colorbar()
+    name = 'Bus ' + str(bus) + '\n(' + str(df_clu_red.shape[0]) + ' events)'
+    plt.title(name)
+    
+def plot_wADC_vs_gADC_buses():
+    bus_vec = np.array(range(0,3))
+    fig = plt.figure()
+    fig.suptitle('2D Histogram of wADC vs gADC',x=0.5, y=1.05, 
+                 fontweight="bold")
+    fig.set_figheight(4)
+    fig.set_figwidth(14)
+    for bus in bus_vec:
+        plot_wADC_vs_gADC(bus, fig)
+    name = '2D Histogram of wADC vs gADC, individual buses'
+    plt.tight_layout()
+    plt.show()
+    plot_path = get_path() + name  + '.pdf'
+    fig.savefig(plot_path, bbox_inches='tight')
 
 
     

@@ -9,7 +9,7 @@ import numpy as np
 
 
 
-def import_data():
+def import_data(ADCthres=0):
     """ Imports raw data from sister folder 'Data/', stores it in a pandas 
         DataFrame and then returns it. If several files are present in the 
         'Data/'-folder, these are concatenated into one large DataFrame.
@@ -40,6 +40,8 @@ def import_data():
     df_tot['Bus'] = df_tot['Bus'].astype(int)
     df_tot['Channel'] = df_tot['Channel'].astype(int)
     df_tot['ADC'] = df_tot['ADC'].astype(int)
+    
+    df_tot = df_tot[df_tot.ADC > ADCthres]
     
     df_tot.reset_index(drop=True, inplace=True)
     print(df_tot)
@@ -142,14 +144,14 @@ def save_clusters(df_clu, bus):
     df_clu.to_csv(file_path, sep=',', encoding='utf-8', index=False)
     
 
-def import_and_save():
+def import_and_save(ADCthres=0):
     """ Imports data, clusters it, and saves the clusters to file.
          
     Yields:
         Saves the clusters to file
             
     """
-    df = import_data()
+    df = import_data(ADCthres)
     bus_vec = np.array(range(0,3))
     for bus in bus_vec:
         df_clu = cluster_data(df, bus)  
