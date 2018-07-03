@@ -16,7 +16,7 @@ bus_vec = [0,1,2]
 #pl.plot_2D_side_2(bus_vec)
 #pl.plot_2D_side_3(bus_vec)                                           
 
-pl.plot_all_sides(bus_vec)
+#pl.plot_all_sides(bus_vec)
 
 #df = clu.import_data()
 #pl.plot_PHS_buses(df)
@@ -30,3 +30,9 @@ pl.plot_all_sides(bus_vec)
 #pl.plot_charge_buses()
 #pl.plot_DeltaT_events_buses()
 #pl.plot_DeltaT_events_Compare44and75_buses()
+
+
+#pl.plot_3d_surfaces()
+
+thres=330
+pl.plot_all_sides_3D(bus_vec,thres)
