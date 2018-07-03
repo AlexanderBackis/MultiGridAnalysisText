@@ -1,12 +1,12 @@
 import clustering as clu
 import plot as pl
 
-#ADCthres = 400
+ADCthres = 2000
 #countThres = 0
 #
 ##clu.import_and_save(ADCthres)
-##pl.plot_2D_hit_buses()
-##pl.plot_2D_multiplicity_buses() 
+#pl.plot_2D_hit_buses(ADCthres) #OK
+pl.plot_2D_multiplicity_buses(ADCthres) 
 ##
 ##bus_vec = [2,1,0]
 ##pl.plot_all_sides_3D(bus_vec, countThres)
@@ -15,7 +15,7 @@ import plot as pl
 #df = clu.import_data(ADCthres)
 #pl.plot_PHS_buses(df)
 
-pl.plot_wADC_vs_gADC_buses()
+#pl.plot_wADC_vs_gADC_buses()
 
 
 

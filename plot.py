@@ -43,31 +43,38 @@ def plot_PHS_buses(df):
 # Plot 2D Histogram of Hit Position
 # =============================================================================
 
-def plot_2D_hit(bus, fig):
+def plot_2D_hit(bus, fig, thresADC = 0):
     df_clu = load_clusters(bus)
-    df_clu_red = df_clu[(df_clu.wCh != -1) & (df_clu.gCh != -1)]
+    df_clu_red = df_clu[(df_clu.wCh != -1) & (df_clu.gCh != -1) &
+                        (df_clu.wADC > thresADC)]
     plt.subplot(1,3,bus+1)
     plt.hist2d(df_clu_red.wCh, df_clu_red.gCh, bins=[80, 40], 
                range=[[0,80],[80,120]], norm=LogNorm(), vmin=1, vmax=10000)
     plt.xlabel("Wire [Channel number]")
     plt.ylabel("Grid [Channel number]")
+    
+    loc = np.arange(80, 130, step=10)
+    plt.yticks(loc, loc)
+    
     plt.colorbar()
-    name = 'Bus ' + str(bus)
+    name = 'Bus ' + str(bus) + '\n(' + str(df_clu_red.shape[0]) + ' events)'
     plt.title(name)
     
-def plot_2D_hit_buses():
+def plot_2D_hit_buses(thresADC = 0):
     bus_vec = np.array(range(0,3))
     fig = plt.figure()
-    fig.suptitle('2D-Histogram of hit position',x=0.5, y=1)
+    fig.suptitle('2D-Histogram of hit position (Threshold: ' 
+                 + str(thresADC) + ' ADC channels)', x=0.5, y=1.05, 
+                 fontweight="bold")
     fig.set_figheight(4)
     fig.set_figwidth(14)
     for bus in bus_vec:
-        plot_2D_hit(bus, fig)
+        plot_2D_hit(bus, fig, thresADC)
     name = '2D-Histogram of hit position, individual buses'
     plt.tight_layout()
     plt.show()
     plot_path = get_path() + name  + '.pdf'
-    fig.savefig(plot_path)
+    fig.savefig(plot_path, bbox_inches='tight')
     
 
 # =============================================================================
@@ -346,7 +353,7 @@ def plot_trigger_difference(df):
 # Plot Histogram of Multiplicity
 # =============================================================================    
     
-def plot_multiplicity(bus, fig):
+def plot_multiplicity(bus, fig, thresADC=0):
     df_clu = load_clusters(bus)
     plt.subplot(1,3,bus+1)
     plt.hist(df_clu.wM, bins=25, log = True, range=[0,25],
@@ -360,15 +367,16 @@ def plot_multiplicity(bus, fig):
     name = 'Bus ' + str(bus)
     plt.title(name)
     
-def plot_multiplicity_buses():
+def plot_multiplicity_buses(thresADC=0):
     bus_vec = np.array(range(0,3))
     fig = plt.figure()
-    fig.suptitle('Histogram of multiplicity',x=0.5, y=1)
+    fig.suptitle('Histogram of multiplicity',x=0.5, y=1.05)
     fig.set_figheight(4)
     fig.set_figwidth(14)
     for bus in bus_vec:
-        plot_multiplicity(bus, fig)
-    name = 'Histogram of multiplicity, individual buses'
+        plot_multiplicity(bus, fig, thresADC)
+    name = ('Histogram of multiplicity \n(ADC threshold: ' + str(thresADC) + 
+                                          ' ADC channels)')
     plt.tight_layout()
     plt.show()
     plot_path = get_path() + name  + '.pdf'
@@ -392,8 +400,9 @@ def plot_multiplicity_buses():
 #    name = 'Bus ' + str(bus)
 #    plt.title(name)
     
-def plot_2D_multiplicity(bus, fig):
+def plot_2D_multiplicity(bus, fig, thresADC=0):
     df_clu = load_clusters(bus)
+    df_clu = df_clu[df_clu.wADC > thresADC]
     plt.subplot(1,3,bus+1)
     hist, xbins, ybins, im = plt.hist2d(df_clu.wM, df_clu.gM, bins=[8, 8], 
                                         range=[[0,8],[0,8]],
@@ -415,24 +424,25 @@ def plot_2D_multiplicity(bus, fig):
     plt.ylabel("Grid Multiplicity")
     plt.colorbar()
     plt.tight_layout()
-    name = 'Bus ' + str(bus)
+    name = 'Bus ' + str(bus) + '\n(' + str(df_clu.shape[0]) + ' events)'
     plt.title(name)
 
-def plot_2D_multiplicity_buses():
+def plot_2D_multiplicity_buses(thresADC=0):
     bus_vec = np.array(range(0,3))
     fig = plt.figure()
-    fig.suptitle('2D Histogram of multiplicity within a time cluster', x=0.5, 
-                 y=1)
+    fig.suptitle('2D-Histogram of multiplicity within a time cluster (Threshold: ' 
+                 + str(thresADC) + ' ADC channels)', x=0.5, y=1.05, 
+                 fontweight="bold")
     fig.set_figheight(4)
     fig.set_figwidth(14)
     for bus in bus_vec:
-        plot_2D_multiplicity(bus, fig)
+        plot_2D_multiplicity(bus, fig, thresADC)
     name = '2D Histogram of multiplicity, individual buses'
     
     plt.tight_layout()
     plt.show()
     plot_path = get_path() + name  + '.pdf'
-    fig.savefig(plot_path)
+    fig.savefig(plot_path, bbox_inches='tight')
    
 # =============================================================================
 # Plot time difference between events
