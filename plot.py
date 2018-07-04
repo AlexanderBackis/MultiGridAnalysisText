@@ -168,12 +168,12 @@ def plot_all_sides(bus_vec):
     plt.subplot(1,3,3)
     plot_2D_side_3(bus_vec, fig)
     
-    name = ('2D Histogram of hit position, different sides')
-    fig.suptitle(name, x=0.5, y=1)
+    name = ('2D Histogram of hit position, different perspectives')
+    fig.suptitle(name, x=0.5, y=1.05, fontweight="bold")
     plt.tight_layout()
     plt.show()
     plot_path = get_path() + name  + '.pdf'
-    fig.savefig(plot_path)
+    fig.savefig(plot_path, bbox_inches='tight')
     
 
 def plot_all_sides_3D(bus_vec, countThres):
@@ -218,9 +218,9 @@ def scatter3d(x,y,z, cs, countThres, colorsMap='viridis'):
    # cNorm = Normalize(vmin=min(cs), vmax=max(cs))
     scalarMap = cmx.ScalarMappable(norm=LogNorm(), cmap=cm)
     fig = plt.figure()
-    name = ('Scatter map of hit location (threshold: ' 
+    name = ('Scatter map of hit location (Threshold: ' 
             + str(countThres) + ' counts)')
-    fig.suptitle(name ,x=0.45, y=1)
+    fig.suptitle(name ,x=0.5, y=1.1, fontweight="bold")
     ax = Axes3D(fig)
     ax.scatter(x, y, z, c=scalarMap.to_rgba(cs), marker= "o", alpha = 0.6)
    

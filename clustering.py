@@ -47,7 +47,7 @@ def import_data(ADCthres=0):
     print(df_tot)
     return df_tot
 
-def cluster_data(df, bus):
+def cluster_data(df, bus, s=False):
     """ Clusters the data contained in the imported pd.DataFrame. Data points
         with the same timestamp are grouped together, the wire channel and
         grid channel with most collected charge are then used as 2D hit 
@@ -92,7 +92,7 @@ def cluster_data(df, bus):
                     wADC = wADC + row.ADC
                     wM = wM + 1
                     if row.ADC > wChTemp[1]:
-                        wChTemp[0] = Channel
+                        wChTemp[0] = Channel + switch(Channel,s)
                         wChTemp[1] = row.ADC
                 else:
                     gADC = gADC + row.ADC
@@ -146,7 +146,7 @@ def save_clusters(df_clu, bus):
     df_clu.to_csv(file_path, sep=',', encoding='utf-8', index=False)
     
 
-def import_and_save(ADCthres=0):
+def import_and_save(ADCthres=0, s=False):
     """ Imports data, clusters it, and saves the clusters to file.
          
     Yields:
@@ -156,7 +156,7 @@ def import_and_save(ADCthres=0):
     df = import_data(ADCthres)
     bus_vec = np.array(range(0,3))
     for bus in bus_vec:
-        df_clu = cluster_data(df, bus)  
+        df_clu = cluster_data(df, bus, s)  
         save_clusters(df_clu, bus)
         
 
@@ -166,6 +166,15 @@ def import_and_save(ADCthres=0):
 # =============================================================================
 # Helper Functions
 # =============================================================================
+        
+def switch(Channel, s):
+    if s:
+        if Channel % 2 == 0:
+            return 1
+        else:
+            return (-1)
+    else:
+        return 0
 
 def get_path():
     dirname = os.path.dirname(__file__)

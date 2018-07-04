@@ -3,14 +3,15 @@ import plot as pl
 
 ADCthres = 0
 countThres = 0
+s=True
 #
-#clu.import_and_save(ADCthres)
+#clu.import_and_save(ADCthres, s)
 #pl.plot_2D_hit_buses(ADCthres)
 #pl.plot_2D_multiplicity_buses(ADCthres) 
 ##
 bus_vec = [0,1,2]
-pl.plot_all_sides_3D(bus_vec, 250)
-#pl.plot_all_sides(bus_vec)
+pl.plot_all_sides_3D(bus_vec, 300)
+pl.plot_all_sides(bus_vec)
 #
 #df = clu.import_data(ADCthres)
 #pl.plot_PHS_buses(df)

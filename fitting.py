@@ -14,5 +14,6 @@ import numpy as np
 #def poisson(k, lamb):
 #    return (lamb**k/factorial(k)) * np.exp(-lamb)
 #
-print(int(np.ceil(41/20)))
-print(19 % 20)
+#print(int(np.ceil(41/20)))
+#print(19 % 20)
+print(4%2)
