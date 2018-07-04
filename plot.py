@@ -70,7 +70,8 @@ def plot_2D_hit_buses(thresADC = 0):
     fig.set_figwidth(14)
     for bus in bus_vec:
         plot_2D_hit(bus, fig, thresADC)
-    name = '2D-Histogram of hit position, individual buses'
+    name = ('20180628-130039_1, 2D-Histogram of hit position (Threshold: ' 
+                 + str(thresADC) + ' ADC channels)')
     plt.tight_layout()
     plt.show()
     plot_path = get_path() + name  + '.pdf'
@@ -437,8 +438,8 @@ def plot_2D_multiplicity_buses(thresADC=0):
     fig.set_figwidth(14)
     for bus in bus_vec:
         plot_2D_multiplicity(bus, fig, thresADC)
-    name = '2D Histogram of multiplicity, individual buses'
-    
+    name = ('20180628-130039_1, 2D-Histogram of multiplicity within a time cluster (Threshold: ' 
+            + str(thresADC) + ' ADC channels)')
     plt.tight_layout()
     plt.show()
     plot_path = get_path() + name  + '.pdf'

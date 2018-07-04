@@ -93,11 +93,13 @@ def cluster_data(df, bus):
                     wM = wM + 1
                     if row.ADC > wChTemp[1]:
                         wChTemp[0] = Channel
+                        wChTemp[1] = row.ADC
                 else:
                     gADC = gADC + row.ADC
                     gM = gM + 1
                     if row.ADC > gChTemp[1]:
                         gChTemp[0] = Channel
+                        gChTemp[1] = row.ADC
                 
                 row = next(itr)[1]
                 rowNbr = rowNbr + 1
