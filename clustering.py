@@ -9,11 +9,17 @@ import numpy as np
 
 
 
-def import_data(ADCthres=0):
+def import_data(ADCthres=0, switch=False):
     """ Imports raw data from sister folder 'Data/', stores it in a pandas 
         DataFrame and then returns it. If several files are present in the 
         'Data/'-folder, these are concatenated into one large DataFrame.
-         
+    
+    Args:
+        ADCthres (int): Sets a threshold on the raw data, all data with an ADC
+                        value below this threshold are discarded
+        
+        switch (bool): If True, all wire channels will be switched pairwise
+    
     Returns:
         df_tot (pd.DataFrame): DataFrame were each row is a datapoint, and each 
                                column is a different measured property 
@@ -21,10 +27,10 @@ def import_data(ADCthres=0):
             
     """
     dirname = os.path.dirname(__file__)
-    print(dirname)
     folder = os.path.join(dirname, '../Data/')
     files_in_folder = os.listdir(folder)
     df_tot = pd.DataFrame()
+    
     for file in files_in_folder:
         if file[-4:] == '.csv':
             file_path = folder + file
@@ -43,11 +49,13 @@ def import_data(ADCthres=0):
     
     df_tot = df_tot[df_tot.ADC > ADCthres]
     
+    if switch:
+        df_tot = switch_wCh_pairwise(df_tot)
+        
     df_tot.reset_index(drop=True, inplace=True)
-    print(df_tot)
     return df_tot
 
-def cluster_data(df, bus, s=False):
+def cluster_data(df, bus):
     """ Clusters the data contained in the imported pd.DataFrame. Data points
         with the same timestamp are grouped together, the wire channel and
         grid channel with most collected charge are then used as 2D hit 
@@ -92,7 +100,7 @@ def cluster_data(df, bus, s=False):
                     wADC = wADC + row.ADC
                     wM = wM + 1
                     if row.ADC > wChTemp[1]:
-                        wChTemp[0] = Channel + switch(Channel,s)
+                        wChTemp[0] = Channel
                         wChTemp[1] = row.ADC
                 else:
                     gADC = gADC + row.ADC
@@ -100,7 +108,6 @@ def cluster_data(df, bus, s=False):
                     if row.ADC > gChTemp[1]:
                         gChTemp[0] = Channel
                         gChTemp[1] = row.ADC
-                
                 row = next(itr)[1]
                 rowNbr = rowNbr + 1
             
@@ -153,10 +160,10 @@ def import_and_save(ADCthres=0, s=False):
         Saves the clusters to file
             
     """
-    df = import_data(ADCthres)
+    df = import_data(ADCthres, s)
     bus_vec = np.array(range(0,3))
     for bus in bus_vec:
-        df_clu = cluster_data(df, bus, s)  
+        df_clu = cluster_data(df, bus)  
         save_clusters(df_clu, bus)
         
 
@@ -167,15 +174,6 @@ def import_and_save(ADCthres=0, s=False):
 # Helper Functions
 # =============================================================================
         
-def switch(Channel, s):
-    if s:
-        if Channel % 2 == 0:
-            return 1
-        else:
-            return (-1)
-    else:
-        return 0
-
 def get_path():
     dirname = os.path.dirname(__file__)
     folder = os.path.join(dirname, '../Plot/')
@@ -192,3 +190,15 @@ def create_dict(size):
     gM = np.empty([size],dtype=int)
     return {'Time': Time, 'ToF': ToF, 'wCh': wCh, 'gCh': gCh, 'wADC': wADC, 
             'gADC': gADC, 'wM': wM, 'gM': gM}
+    
+def switch_wCh_pairwise(df):
+    df.reset_index(drop=True, inplace=True)
+    size = df.shape[0]
+    for i in range(0, size):
+        ch = df.at[i, 'Channel']
+        if ch < 80:
+            if ch % 2 == 0:
+                df.at[i, 'Channel'] = ch + 1
+            else:
+                df.at[i, 'Channel'] = ch - 1
+    return df

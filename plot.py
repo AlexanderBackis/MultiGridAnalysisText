@@ -17,7 +17,7 @@ def plot_PHS(df, bus, fig):
     df_red = df[df.Bus == bus]
     plt.subplot(1,3,bus+1)
     plt.hist2d(df_red.Channel, df_red.ADC, bins=[120, 120], norm=LogNorm(), 
-               range=[[0, 120], [0, 4400]], vmin=1, vmax=10000)
+               range=[[0, 120], [0, 4400]], vmin=1, vmax=3000)
     plt.ylabel("Charge [ADC channels]")
     plt.xlabel("Channel [a.u.]")
     plt.colorbar()
@@ -38,6 +38,181 @@ def plot_PHS_buses(df):
     plt.show()
     plot_path = get_path() + name  + '.pdf'
     fig.savefig(plot_path)
+    
+def plot_2D_hist_single_bus(df, bus):
+    fig = plt.figure()
+    name = '2D-Histogram of Channel vs Charge, bus ' + str(bus)
+    df_red = df[df.Bus == bus]
+    plt.hist2d(df_red.Channel, df_red.ADC, bins=[120, 50], norm=LogNorm(), 
+               range=[[0, 120], [0, 4400]], vmin=1, vmax=3000, cmap = 'jet')
+    plt.ylabel("Charge [ADC channels]")
+    plt.xlabel("Channel [a.u.]")
+    plt.title(name)
+    plt.colorbar()
+    plot_path = get_path() + name  + '.pdf'
+    fig.savefig(plot_path)
+
+
+# =============================================================================
+# Plot 3D Pulse Height Spectrum, Channel VS Charge
+# =============================================================================
+
+
+def plot_PHS_3D_surface(df):
+    bus_vec = np.array(range(0,3))
+    fig = plt.figure()
+    fig.suptitle('3D histogram of Channel vs Charge all buses',x=0.5,
+                 y=1.05, fontweight="bold")
+    fig.set_figheight(4)
+    fig.set_figwidth(14)
+    for nbr, bus in enumerate(bus_vec):
+        plot_PHS_3D_surface_bus(df, bus, fig, nbr)
+    name = '3D histogram of Channel vs Charge all buses'
+    plt.tight_layout()
+    plt.show()
+    plot_path = get_path() + name  + '.pdf'
+    fig.savefig(plot_path)
+    
+    
+def plot_PHS_3D_surface_bus(df, bus, fig, nbr):
+    df_red = df[df.Bus == bus]
+    plt.subplot(3,2,nbr+bus+1)
+    hist, xbins, ybins, im = plt.hist2d(df_red.Channel, df_red.ADC, 
+                                        bins=[80, 120], range=[[0, 80], 
+                                              [0, 4400]])
+    
+    Z = hist
+    X, Y = np.meshgrid(xbins, ybins)
+    plot_PHS_surface(X,Y,Z, fig)
+    
+    name = 'Wires, bus ' + str(bus)
+    plt.title(name)
+    
+    
+    plt.subplot(3,2,nbr+bus+2)
+    hist, xbins, ybins, im = plt.hist2d(df_red.Channel, df_red.ADC, 
+                                        bins=[40, 120], range=[[80, 120], 
+                                              [0, 4400]])
+    
+    Z = hist
+    print(hist.shape)
+    X, Y = np.meshgrid(xbins, ybins)
+    print(X.shape)
+    print(Y.shape)
+    
+    plot_PHS_surface(X,Y,Z, fig)
+    
+    name = 'Grids, bus ' + str(bus)
+    plt.title(name)
+
+def plot_3D_new(df, bus):    
+    df_red = df[df.Bus == bus]
+#    df_red.reset_index(drop=True, inplace=True)
+#    size = df_red.shape[0]
+#    for i in range(0, size):
+#        ch = df_red.at[i, 'Channel']
+#        if ch < 80:
+#            if ch % 2 == 0:
+#                df_red.at[i, 'Channel'] = ch + 1
+#            else:
+#                df_red.at[i, 'Channel'] = ch - 1
+                    
+    histW, xbinsW, ybinsW, imW = plt.hist2d(df_red.Channel, df_red.ADC,
+                                        bins=[80, 50], range=[[0, 79], 
+                                              [0, 4400]])
+    
+    histG, xbinsG, ybinsG, imG = plt.hist2d(df_red.Channel, df_red.ADC,
+                                        bins=[40, 50], range=[[80, 120], 
+                                              [0, 4400]])
+    histVec = [histW, histG]
+    xbinsVec = [xbinsW, xbinsG]
+    ybinsVec = [ybinsW, ybinsG]
+    nameVec =  ['Wires', 'Grids']
+    xlimVec =  [ [0, 80], [80, 120]]
+    zlimVec =   [[0,500], [0,3000]]
+    
+    
+    fig = plt.figure()
+    fig.set_size_inches(15, 6)
+#    fig = plt.figure('position', [0, 0, 200, 500])
+
+    name = 'Surface plot of pulse height spectrum, bus ' + str(bus)
+    plt.suptitle(name, x=0.5, y=1, fontweight="bold")
+    for i in range(0,2):
+        ax = fig.add_subplot(1, 2, i+1, projection='3d')
+        Z = histVec[i].T
+        X, Y = np.meshgrid(xbinsVec[i][:-1], ybinsVec[i][:-1][::-1])
+        color_dimension = Z
+        m = plt.cm.ScalarMappable(norm=LogNorm(), cmap='jet')
+        m.set_array([])
+        fcolors = m.to_rgba(color_dimension)
+        ax.plot_surface(X,Y,Z, rstride=1, cstride=1, facecolors=fcolors, 
+                        shade=True)
+        ax.set_xlabel('Channel [a.u.]')
+        ax.set_ylabel('Charge [ADC Channels]')
+        ax.set_zlabel('Counts')
+        ax.set_xlim(xlimVec[i])
+        ax.set_zlim(zlimVec[i])
+    
+        ax.set_ylim([0,5000])
+        ticks = np.arange(0, 6000, step=1000)
+        ax.set_yticks(ticks)
+        ax.set_yticklabels(ticks[::-1])
+        #fig.colorbar(m)
+    
+        plt.title(nameVec[i], x=0.5, y=1.05, fontweight="bold")
+        
+    plt.show()
+    plot_path = get_path() + name  + '.pdf'
+    fig.savefig(plot_path, bbox_inches='tight')
+
+
+def plot_PHS_surface(X,Y,Z, fig):
+
+
+
+    # fourth dimention - colormap
+    # create colormap according to x-value (can use any 50x50 array)
+    color_dimension = X # change to desired fourth dimension
+    minn, maxx = color_dimension.min(), color_dimension.max()
+    norm = Normalize(minn, maxx)
+    m = plt.cm.ScalarMappable(norm=norm, cmap='viridis')
+    m.set_array([])
+    fcolors = m.to_rgba(color_dimension)
+
+    # plot
+    ax = fig.gca(projection='3d')
+    ax.plot_surface(X,Y,Z, rstride=1, cstride=1, facecolors=fcolors, vmin=minn, vmax=maxx, shade=True)
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.set_zlabel('z')
+    ax.set_zscale('Log')
+    fig.canvas.show()
+    
+def plot_PHS_bus_channel(df, bus, Channel):
+    df_red = df[df.Channel == Channel]
+    plt.hist(df_red.ADC, bins=50, range=[0,4400])  
+    
+def plot_PHS_several_channels(df, bus, ChVec, ylim):
+    fig = plt.figure()
+    df_red = df[df.Bus == bus]
+    #df_red = switch_wCh_pairwise(df, bus)
+    
+    for Channel in ChVec:
+        df_ch = df_red[df_red.Channel == Channel]
+        plt.hist(df_ch.ADC, bins=100, range=[0,4400], alpha = 1, 
+                 label = 'Channel ' + str(Channel))
+    
+    plt.legend(loc='upper right')
+    plt.xlabel("Charge  [ADC channels]")
+    plt.ylabel("Counts")
+    name = 'PHS for several channels, Bus ' + str(bus) + '\nChannels: ' + str(ChVec)
+    #plt.ylim(ylim)
+    plt.title(name)
+    plot_path = get_path() + name  + '.pdf'
+    fig.savefig(plot_path, bbox_inches='tight')
+    
+
 
 # =============================================================================
 # Plot 2D Histogram of Hit Position
@@ -282,7 +457,35 @@ def plot_charge_frac_buses():
     plot_path = get_path() + name  + '.pdf'
     fig.savefig(plot_path)
    
+# =============================================================================
+# Plot PHS for different BC4 layer thicknesses
+# =============================================================================
     
+def plot_PHS_different_thicknesses(df, bus):
+    fig = plt.figure()
+    df = df[df.Bus == bus]
+    dfVec = np.empty([3],dtype=pd.DataFrame)
+    nameVec =  ['1 $\mu$m', '1.25 $\mu$m', '2 $\mu$m']
+    rVec = [[0,4], [5,14], [15,20]]
+    
+    for i in range(0,3):
+        dfVec[i] = df[   ((rVec[i][0] <= df.Channel) & (rVec[i][1] >= df.Channel))
+                       | (((rVec[i][0]+20) <= df.Channel) & ((rVec[i][1]+20) >= df.Channel))
+                       | (((rVec[i][0]+40) <= df.Channel) & ((rVec[i][1]+40) >= df.Channel))
+                       | (((rVec[i][0]+60) <= df.Channel) & ((rVec[i][1]+60) >= df.Channel))  ]
+        
+    for i, df_red in enumerate(dfVec):
+            plt.hist(df_red.ADC, bins=100, alpha = 1, label = nameVec[i], 
+                     histtype='step')
+    
+    plt.legend(loc='upper right')
+    plt.xlabel("Charge [ADC channels]")
+    plt.ylabel("Counts")
+    name = 'PHS for different BC4 layer thicknesses, bus ' + str(bus)
+    plt.title(name)
+    plt.show()
+    plot_path = get_path() + name  + '.pdf'
+    fig.savefig(plot_path)
     
     
 # =============================================================================
@@ -753,6 +956,18 @@ def load_clusters_from_file_path(bus, file_path):
     
     return df_clu
 
+def switch_wCh_pairwise(df, bus):
+    df_red = df[df.Bus == bus]
+    df_red.reset_index(drop=True, inplace=True)
+    size = df_red.shape[0]
+    for i in range(0, size):
+        ch = df_red.at[i, 'Channel']
+        if ch < 80:
+            if ch % 2 == 0:
+                df_red.at[i, 'Channel'] = ch + 1
+            else:
+                df_red.at[i, 'Channel'] = ch - 1
+    return df_red
 
 
 
